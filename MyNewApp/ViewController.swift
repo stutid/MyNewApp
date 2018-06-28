@@ -24,11 +24,21 @@ class ViewController: UIViewController, UICollectionViewDataSource {
         
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "collectCell", for: indexPath) as! CollectionViewCell
         cell.contentView.backgroundColor = UIColor.red
-        cell.imgView.backgroundColor = UIColor.blue
+//        cell.imgView.backgroundColor = UIColor.blue
         let obj = arrData[indexPath.row]
+        
+//        do {
+//            let imageURL = URL(string: obj.imageName!)
+//            let dataImage = try Data(contentsOf: imageURL!)
+//            cell.imgView.image = UIImage(data: dataImage)
+//        }
+//        catch {
+//            print("Error converting image URL to image Data")
+//        }
+        
         cell.lblTitle.text = "Title: \(obj.title ?? "")"
         cell.lblPrice.text = "Price: \(obj.price ?? 0)"
-        cell.lblAddress.text = "Address: U.S.A."
+        cell.lblAddress.text = "Address: \(obj.address ?? "")"
         return cell
     }
     
@@ -56,17 +66,26 @@ class ViewController: UIViewController, UICollectionViewDataSource {
                     if let arr = dict["items"] as? [[String: Any]] {
                         for items in arr {
                             let itemsObj = ItemsModel()
-//                            itemsObj.imageName = items[""] as? String
+                            
+                            if let imageArr = items["images"] as? [[String: Any]] {
+                                for image in imageArr {
+                                    itemsObj.imageName = image["url"] as? String
+                                }
+                            }
+                            
                             itemsObj.title = items["title"] as? String
                             itemsObj.price = items["price"] as? Int
-//                            itemsObj.address = items[""] as? String
+                            
+                            if let locationDict = items["location"] as? [String: Any] {
+                                itemsObj.address = locationDict["address"] as? String
+                            }
                             self.arrData.append(itemsObj)
                         }
                     }
                 }
             }
             catch {
-                
+                print("Error while serializing data from JSON to Dictionary")
             }
             
             DispatchQueue.main.async {
@@ -76,11 +95,6 @@ class ViewController: UIViewController, UICollectionViewDataSource {
         }
         task.resume()
         
-        
     }
-    
-    
-    
-
 }
 
