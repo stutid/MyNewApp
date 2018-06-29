@@ -20,12 +20,16 @@ class ItemsModel {
             for image in imageArr {
                 self.imageData = ItemsImageModel(image)
             }
-            self.title = jsonDict["title"] as? String
-            self.price = jsonDict["price"] as? Int
-            
-            if let locationDict = jsonDict["location"] as? [String: Any] {
-                self.address = locationDict["address"] as? String
-            }
+        }
+        else{
+            self.imageData = ItemsImageModel([:], isImageAvailable: false)
+        }
+        
+        self.title = jsonDict["title"] as? String
+        self.price = jsonDict["price"] as? Int
+        
+        if let locationDict = jsonDict["location"] as? [String: Any] {
+            self.address = locationDict["address"] as? String
         }
     }
 }
