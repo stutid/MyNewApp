@@ -8,13 +8,14 @@
 
 import UIKit
 
-class ViewController: UIViewController, UICollectionViewDataSource {
+class ViewController: UIViewController, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
 
     @IBOutlet weak var collectionView: UICollectionView!
-    var arrData = [ItemsModel]()
+    var arrData = [ItemsModelStruct]()
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        
         getResponse()
     }
 
@@ -22,20 +23,21 @@ class ViewController: UIViewController, UICollectionViewDataSource {
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "collectCell", for: indexPath) as! CollectionViewCell
+        
         let obj = arrData[indexPath.row]
         
-        do {
-            let imageURL = URL(string: obj.imageData?.url ?? "")
-            let dataImage = try Data(contentsOf: imageURL!)
-            cell.imgView.image = UIImage(data: dataImage)
-        }
-        catch {
-            print("Error converting image URL to image Data")
-        }
+//        do {
+//            let imageURL = URL(string: obj.imageData?.url ?? "")
+//            let dataImage = try Data(contentsOf: imageURL!)
+//            cell.imgView.image = UIImage(data: dataImage)
+//        }
+//        catch {
+//            print("Error converting image URL to image Data")
+//        }
         
-        cell.lblTitle.text = "Title: \(obj.title ?? "")"
-        cell.lblPrice.text = "Price: \(obj.price ?? 0)"
-        cell.lblAddress.text = "Address: \(obj.address ?? "")"
+        cell.lblTitle.text = "Title: \(obj.titleName ?? "")"
+        cell.lblPrice.text = "Price: \(obj.priceValue ?? 0)"
+        cell.lblAddress.text = "Address: \(obj.addressNum ?? "")"
         return cell
     }
     
@@ -44,6 +46,13 @@ class ViewController: UIViewController, UICollectionViewDataSource {
         return arrData.count
     }
     
+    
+//    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
+//        if indexPath.row == 0 {
+//            return CGSize(width: 100, height: 100)
+//        }
+//        return CGSize(width: 200, height: 200)
+//    }
     
     func getResponse() {
         let path = "https://private-91146-mobiletask.apiary-mock.com/realestates"
@@ -60,6 +69,7 @@ class ViewController: UIViewController, UICollectionViewDataSource {
             }
             
             do {
+                /*
                 if let dict = try JSONSerialization.jsonObject(with: content, options: []) as? [String: Any] {
                     if let arr = dict["items"] as? [[String: Any]] {
                         for items in arr {
@@ -67,7 +77,11 @@ class ViewController: UIViewController, UICollectionViewDataSource {
                             self.arrData.append(itemsObj)
                         }
                     }
-                }
+                }*/
+                
+                let jsonData = try JSONDecoder().decode(Items.self, from: content)
+                self.arrData.append(contentsOf: jsonData.items)
+                
             }
             catch {
                 print("Error while serializing data from JSON to Dictionary")
