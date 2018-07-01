@@ -10,13 +10,18 @@ import UIKit
 
 class ViewController: UIViewController, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
 
+    
+    let flatPath = "https://private-91146-mobiletask.apiary-mock.com/realestates"
+    let newsPath = "https://api.nytimes.com/svc/search/v2/articlesearch.json?api-key=5763846de30d489aa867f0711e2b031c&q=singapore&page=0"
+    
+    
     @IBOutlet weak var collectionView: UICollectionView!
-    var arrData = [ItemsModelStruct]()
-
+    var arrData = [MyItemNewsProtocol]()
+    
     override func viewDidLoad() {
         super.viewDidLoad()
-        
         getResponse()
+        getNewsResponse()
     }
 
     
@@ -24,8 +29,10 @@ class ViewController: UIViewController, UICollectionViewDataSource, UICollection
         
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "collectCell", for: indexPath) as! CollectionViewCell
         
-        let obj = arrData[indexPath.row]
         
+        
+        
+        if let obj = arrData[indexPath.row] as? ItemsModelStruct {
 //        do {
 //            let imageURL = URL(string: obj.imageData?.url ?? "")
 //            let dataImage = try Data(contentsOf: imageURL!)
@@ -35,9 +42,16 @@ class ViewController: UIViewController, UICollectionViewDataSource, UICollection
 //            print("Error converting image URL to image Data")
 //        }
         
-        cell.lblTitle.text = "Title: \(obj.titleName ?? "")"
-        cell.lblPrice.text = "Price: \(obj.priceValue ?? 0)"
-        cell.lblAddress.text = "Address: \(obj.addressNum ?? "")"
+        cell.lblTitle.text = "Title: \(obj.title)"
+        cell.lblPrice.text = "Price: \(obj.price)"
+        cell.lblAddress.text = "Address: \(obj.desc)"
+        }
+        else if let obj = arrData[indexPath.row] as? NewsModelStruct
+        {
+            cell.lblTitle.text = "Main: \(obj.title)"
+            cell.lblPrice.text = "Snippet: \(obj.subTitle)"
+            cell.lblAddress.text = "Source: \(obj.desc)"
+        }
         return cell
     }
     
@@ -55,8 +69,8 @@ class ViewController: UIViewController, UICollectionViewDataSource, UICollection
 //    }
     
     func getResponse() {
-        let path = "https://private-91146-mobiletask.apiary-mock.com/realestates"
-        let url = URL(string: path)
+
+        let url = URL(string: flatPath)
         let task = URLSession.shared.dataTask(with: url!) { (data, response, error) in
             
             guard error == nil else {
@@ -69,22 +83,14 @@ class ViewController: UIViewController, UICollectionViewDataSource, UICollection
             }
             
             do {
-                /*
-                if let dict = try JSONSerialization.jsonObject(with: content, options: []) as? [String: Any] {
-                    if let arr = dict["items"] as? [[String: Any]] {
-                        for items in arr {
-                            let itemsObj = ItemsModel(items)
-                            self.arrData.append(itemsObj)
-                        }
-                    }
-                }*/
                 
                 let jsonData = try JSONDecoder().decode(Items.self, from: content)
-                self.arrData.append(contentsOf: jsonData.items)
-                
+                for item in jsonData.items {
+                    self.arrData.append(item)
+                }
             }
             catch {
-                print("Error while serializing data from JSON to Dictionary")
+                print("Error while decoding data from JSON")
             }
             
             DispatchQueue.main.async {
@@ -94,5 +100,45 @@ class ViewController: UIViewController, UICollectionViewDataSource, UICollection
         }
         task.resume()
     }
+    
+    
+    func getNewsResponse() {
+        
+        let url = URL(string: newsPath)
+        let task = URLSession.shared.dataTask(with: url!) { (data, response, error) in
+            
+            guard error == nil else {
+                return
+            }
+            
+            guard let content = data else {
+                return
+            }
+            do {
+                let jsonData = try JSONDecoder().decode(News.self, from: content)
+                for news in jsonData.docs {
+                    self.arrData.append(news)
+                }
+            }
+            catch {
+                print("Error while decoding news data")
+            }
+            
+            DispatchQueue.main.async {
+                self.collectionView.reloadData()
+            }
+        }
+        task.resume()
+        
+        
+        
+        
+        
+    }
+    
+    
+    
+    
+    
 }
 

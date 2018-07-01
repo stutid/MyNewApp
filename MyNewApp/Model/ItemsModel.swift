@@ -8,65 +8,113 @@
 
 import Foundation
 
-/*
-class ItemsModel {
-
-    var imageData: ItemsImageModel?
-    var title: String?
-    var price: Int?
-    var address: String?
-
-    init(_ jsonDict: [String: Any]) {
-        if let imageArr = jsonDict["images"] as? [[String: Any]] {
-            for image in imageArr {
-                self.imageData = ItemsImageModel(image)
-            }
-        }
-        else{
-            self.imageData = ItemsImageModel([:], isImageAvailable: false)
-        }
-
-        self.title = jsonDict["title"] as? String
-        self.price = jsonDict["price"] as? Int
-
-        if let locationDict = jsonDict["location"] as? [String: Any] {
-            self.address = locationDict["address"] as? String
-        }
-    }
-}*/
-
-//------------------
+protocol MyItemNewsProtocol {
+    var title: String {get set}
+//    var subTitle: String {get set}
+//    var desc: String {get set}
+}
 
 struct Items: Decodable {
     let items: [ItemsModelStruct]
 }
 
+struct ItemsModelStruct: Decodable, MyItemNewsProtocol {
+    var title: String //title
+    var desc: String //address
+    var price: Int //price
 
-struct ItemsModelStruct: Decodable {
-
-    let titleName: String?
-    let priceValue: Int?
-    let addressNum: String?
 
     private enum CodingKeys: String, CodingKey {
-        case titleName = "title"
-        case priceValue = "price"
-        case addressNum = "address"
+        case title
+        case price = "price"
+        case desc = "address"
         case location
     }
     
     init(from decoder: Decoder) throws {
         
         let container = try decoder.container(keyedBy: CodingKeys.self)
-        titleName = try container.decode(String.self, forKey: .titleName)
-        priceValue = try container.decode(Int.self, forKey: .priceValue)
+        title = try container.decode(String.self, forKey: .title)
+        price = try container.decode(Int.self, forKey: .price)
         
         let locations = try container.nestedContainer(keyedBy: CodingKeys.self, forKey: .location)
-        addressNum = try locations.decode(String.self, forKey: .addressNum)
-        
+        desc = try locations.decode(String.self, forKey: .desc)
+    }
+}
+
+
+struct News: Decodable {
+
+    let docs: [NewsModelStruct]
+    
+    private enum CodingKeys: String, CodingKey {
+        case response
+        case docs
     }
     
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        let responses = try container.nestedContainer(keyedBy: CodingKeys.self, forKey: .response)
+        docs = try responses.decode([NewsModelStruct].self, forKey: .docs)
+    }
 }
+
+
+
+struct NewsModelStruct: Decodable, MyItemNewsProtocol {
+    var title: String //main
+    var desc: String //source
+    var subTitle: String //snippet
+
+    private enum CodingKeys: String, CodingKey {
+        case title = "main"
+        case subTitle = "snippet"
+        case desc = "source"
+        case headline
+    }
+    
+    init(from decoder: Decoder) throws {
+
+    let container = try decoder.container(keyedBy: CodingKeys.self)
+
+    subTitle = try container.decode(String.self, forKey: .subTitle)
+//    desc = try container.decode(String.self, forKey: .desc)
+    if let localDescription = try? container.decode(String.self, forKey: .desc)
+    {
+        desc = localDescription
+    }
+    else
+    {
+        desc = "Default Source"
+    }
+        
+        
+        
+        
+    let headlines = try container.nestedContainer(keyedBy: CodingKeys.self, forKey: .headline)
+    title = try headlines.decode(String.self, forKey: .title)
+
+    }
+    
+    
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
