@@ -10,10 +10,7 @@ import UIKit
 
 class ViewController: UIViewController, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
 
-    
-    let flatPath = "https://private-91146-mobiletask.apiary-mock.com/realestates"
-    let newsPath = "https://api.nytimes.com/svc/search/v2/articlesearch.json?api-key=5763846de30d489aa867f0711e2b031c&q=singapore&page=0"
-    
+    var pageIndex = 0
     
     @IBOutlet weak var collectionView: UICollectionView!
     var arrData = [MyItemNewsProtocol]()
@@ -21,7 +18,7 @@ class ViewController: UIViewController, UICollectionViewDataSource, UICollection
     override func viewDidLoad() {
         super.viewDidLoad()
         getResponse()
-        getNewsResponse()
+        getNewsResponse(for: pageIndex)
     }
 
     
@@ -61,6 +58,11 @@ class ViewController: UIViewController, UICollectionViewDataSource, UICollection
     }
     
     
+    func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
+        pageIndex = pageIndex + 1
+        getNewsResponse(for: pageIndex)
+    }
+    
 //    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
 //        if indexPath.row == 0 {
 //            return CGSize(width: 100, height: 100)
@@ -68,8 +70,13 @@ class ViewController: UIViewController, UICollectionViewDataSource, UICollection
 //        return CGSize(width: 200, height: 200)
 //    }
     
+    
+    
+    
+    
     func getResponse() {
-
+        
+        let flatPath = "https://private-91146-mobiletask.apiary-mock.com/realestates"
         let url = URL(string: flatPath)
         let task = URLSession.shared.dataTask(with: url!) { (data, response, error) in
             
@@ -102,8 +109,8 @@ class ViewController: UIViewController, UICollectionViewDataSource, UICollection
     }
     
     
-    func getNewsResponse() {
-        
+    func getNewsResponse(for pageNumber: Int) {
+        let newsPath = "https://api.nytimes.com/svc/search/v2/articlesearch.json?api-key=5763846de30d489aa867f0711e2b031c&q=singapore&page=\(pageIndex)"
         let url = URL(string: newsPath)
         let task = URLSession.shared.dataTask(with: url!) { (data, response, error) in
             
