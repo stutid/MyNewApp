@@ -91,10 +91,20 @@ class ViewController: UIViewController, UICollectionViewDataSource, UICollection
             
             do {
                 
-                let jsonData = try JSONDecoder().decode(Items.self, from: content)
-                for item in jsonData.items {
-                    self.arrData.append(item)
+//                let jsonData = try JSONDecoder().decode(Items.self, from: content)
+//                for item in jsonData.items {
+//                    self.arrData.append(item)
+//                }
+                
+                
+                let jsonDict = try JSONSerialization.jsonObject(with: content, options: []) as? [String: Any]
+                let arrItems = jsonDict!["items"] as? [[String: AnyObject]]
+                for item in arrItems! {
+                    FlatItems.saveItemsInDatabase(for: item)
                 }
+                
+//                print(FlatItems.fetchItems())
+                
             }
             catch {
                 print("Error while decoding data from JSON")
@@ -107,6 +117,11 @@ class ViewController: UIViewController, UICollectionViewDataSource, UICollection
         }
         task.resume()
     }
+    
+    
+    
+    
+    
     
     
     func getNewsResponse(for pageNumber: Int) {
@@ -136,10 +151,6 @@ class ViewController: UIViewController, UICollectionViewDataSource, UICollection
             }
         }
         task.resume()
-        
-        
-        
-        
         
     }
     
